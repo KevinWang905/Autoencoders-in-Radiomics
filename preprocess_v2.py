@@ -1,5 +1,5 @@
 # Author: Kevin Wang
-# Last Update: December 31, 2020
+# Last Update: January 5, 2021
 
 # Function: Preprocesses lung cancer radiomic data set 
 #			removes exraneous info, binarizes survival time, normalizes features
@@ -15,6 +15,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import normalize
 
 def binarize(time, event, threshold):
 
@@ -31,10 +32,6 @@ threshold = 500
 def preprocess(lungData):
 
 
-	print('One hot encoding of Gender')
-	OH_prep = lungData.loc[:,['Gender']]
-	OH = pd.get_dummies(OH_prep)
-	lungData = pd.concat([lungData, OH], axis=1, ignore_index=False)
 
 	print('Binarizing Survival Time and Deadstatus')
 	result = [binarize(x, y, threshold) for x, y in zip(lungData['Survival.time'], lungData['deadstatus.event'])] 
@@ -42,40 +39,49 @@ def preprocess(lungData):
 
 
 	print('Dropping Irrelevant columns and rows with missing data')
-	lungData.drop(lungData.columns[11:22],axis = 1,  inplace = True)
-	lungData.drop(lungData.columns[14:22],axis = 1,  inplace = True)
-	lungData.drop(columns = ['Histology','PatientName', 'LesionID','Gender', 'Survival.time', 'deadstatus.event'], inplace = True)
+	lungData.drop(lungData.columns[0:33],axis = 1,  inplace = True)
 	print('Dataset before dropping nans = '+str(lungData.shape))
 	lungData.dropna(axis = 0,inplace= True)
 	print('Dataset after dropping nans = '+str(lungData.shape))
 
-	#print(lungData.iloc[0:5,1:5])
-	print('Splitting Dataset into True Values and Featuress')
+
+	print('Splitting Dataset into Labels and Featuress')
 	features = lungData.copy()
-	print(features.iloc[0:5,0:7])
-	features = features.drop(features.columns[1:5], axis = 1)
-	print("Shape of Features: " + str(features.shape))
-	TStage = lungData.iloc[:,1]
-	#TStage.to_excel("TStage.xlsx")
 
-	NStage = lungData.iloc[:,2]
-	#NStage.to_excel("NStage.xlsx")
+	survival = features['binarized']
+	survival = survival.to_numpy()
+	features.drop(columns = ['binarized'], inplace = True)
 
-	overallStage = lungData.iloc[:,4]
-	overallStage = [1 if i == 'I' else 2 if i == 'II' else 3 if i == 'IIIa' else 4 for i in overallStage]
-	toexcel = pd.DataFrame(overallStage)
-	#toexcel.to_excel("overallStage.xlsx")
+	
 
 	print('Normalizing Dataframe')
+	
 	featuresNorm = (features-features.min())/(features.max()-features.min())
 	featuresNorm.dropna(axis='columns', inplace = True)
-	#featuresNorm.to_excel("Normalized_features.xlsx")
+	
+	print("Shape of Features: " + str(features.shape))
+##########################################################################################
 
-	return TStage, NStage, overallStage, featuresNorm
+
+########### Uncomment this block if excel files are needed
+
+
+
+	# featuresNorm.to_excel("Normalized_features.xlsx") 
+	# toexcel = survival
+	# toexcel.to_excel("survival.xlsx")
+
+
+###########################################################################################
+
+	return survival, featuresNorm
 
 
 ###########################################################################################
 ####################################### Update Log ########################################
+
+# January 5, 2021
+# Outputted feature list consists of only radiomic data. Outputted label changed to survival
 
 # December 31, 2020
 # Added step to remove nans after normalizing dataframe; columns with all same value would
