@@ -34,6 +34,8 @@ from sklearn.preprocessing import normalize
 import matplotlib.pyplot as plt
 import pandas as pd
 
+#from imblearn.over_sampling import SMOTE
+
 import os
 from scipy.stats import norm
 
@@ -191,7 +193,11 @@ def dim_red(intermediate_dim, latent_dim, batch_size, learning_rate, features, p
 
     x_train, x_test, y_train, y_test = train_test_split(features, predictions, test_size=0.2, random_state=4)
     
-
+    # oversample = SMOTE()
+    # x_train, y_train = oversample.fit_resample(x_train, y_train)
+    values, counts = np.unique(predictions, return_counts=True)
+    print(values)
+    print(counts)
 
     vae.fit(x_train,
             x_train,

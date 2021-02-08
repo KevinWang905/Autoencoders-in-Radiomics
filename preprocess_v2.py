@@ -1,5 +1,5 @@
 # Author: Kevin Wang
-# Last Update: January 5, 2021
+# Last Update: January 31, 2021
 
 # Function: Preprocesses lung cancer radiomic data set 
 #			removes exraneous info, binarizes survival time, normalizes features
@@ -27,7 +27,7 @@ def binarize(time, event, threshold):
 	else:
 		return 0
 
-threshold = 500
+threshold = 730
 
 def preprocess(lungData):
 
@@ -56,6 +56,7 @@ def preprocess(lungData):
 
 	print('Normalizing Dataframe')
 	
+	featuresNorm = features + abs(features.min())
 	featuresNorm = (features-features.min())/(features.max()-features.min())
 	featuresNorm.dropna(axis='columns', inplace = True)
 	
@@ -79,6 +80,9 @@ def preprocess(lungData):
 
 ###########################################################################################
 ####################################### Update Log ########################################
+
+# January 31, 2021
+# Threshold changed to 730 days, normalization changed to 0 to 1 (from -1 to 1).
 
 # January 5, 2021
 # Outputted feature list consists of only radiomic data. Outputted label changed to survival
